@@ -1,0 +1,79 @@
+{% extends 'project_content/base.html' %}
+{% block content %}
+<div class="pageholder">
+    <div class="titleholder"> 
+        <div class="title"> Google Maps to track your order </div> 
+    </div>
+
+            <div id="map" style="height: 400px; width: 100%;"></div>
+            <script>
+                let map;
+                let directionsService;
+                let directionsRenderer;
+
+                function initMap() {
+                    var mapOptions = {
+                        zoom: 12,
+                        center: { lat: -25.4808, lng: 28.1036 } // Default center (soshanguveLocation)
+                    };
+
+                    map = new google.maps.Map(document.getElementById('map'), mapOptions);
+                    directionsService = new google.maps.DirectionsService();
+                    directionsRenderer = new google.maps.DirectionsRenderer();
+                    directionsRenderer.setMap(map);
+
+                    // Try HTML5 geolocation
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function(position) {
+                            var pos = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+
+                            // Create a marker for the detected position
+                            var marker = new google.maps.Marker({
+                                position: pos,
+                                map: map,
+                                title: 'Your Location'
+                            });
+
+                            map.setCenter(pos);
+                        }, function() {
+                            handleLocationError(true, map.getCenter());
+                        });
+                    } else {
+                        // Browser doesn't support Geolocation
+                        handleLocationError(false, map.getCenter());
+                    }
+                }
+
+                function calculateRoute() {
+                    var origin = document.getElementById('origin').value;
+                    var destination = document.getElementById('destination').value;
+
+                    var request = {
+                        origin: origin,
+                        destination: destination,
+                        travelMode: 'DRIVING'
+                    };
+
+                    directionsService.route(request, function(result, status) {
+                        if (status == 'OK') {
+                            directionsRenderer.setDirections(result);
+                        } else {
+                            window.alert('Error: ' + status);
+                        }
+                    });
+                }
+
+                window.initMap = initMap;
+            </script>
+            <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyANyEAM-XJv4DlL4h1yJlo0VwHBMMqDvHc&callback=initMap"></script>
+        </div>
+    </div>
+
+    <div class="linkholder">  
+        <a href="{% url 'my_home_view' %}"> Go to our homepage</a> 
+    </div>
+</div>
+{% endblock %}
